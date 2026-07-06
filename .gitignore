@@ -1,5 +1,6 @@
 .env
 mappings.json
+deploy/vps-paste.sh
 __pycache__/
 *.py[cod]
 .venv/
