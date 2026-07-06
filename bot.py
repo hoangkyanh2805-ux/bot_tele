@@ -588,6 +588,55 @@ def create_application(settings: Settings, mappings: MappingStore) -> Applicatio
             destinations=destinations,
             **copy_options,
         )
+        if update.edited_message is not None or update.edited_channel_post is not None:
+            LOGGER.info(
+                "Đã copy bài chỉnh sửa message [%s] từ %s",
+                message.message_id,
+                message.chat_id,
+            )
+
+    async def copy_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        message = await require_admin(update)
+        if message is None:
+            return
+
+        chat = update.effective_chat
+        if chat is None:
+            return
+
+        try:
+            if len(context.args) == 1 and chat.type == ChatType.CHANNEL:
+                source_id = chat.id
+                message_id = int(context.args[0])
+            elif len(context.args) == 2:
+                source_id = await resolve_chat_id(context.bot, context.args[0])
+                message_id = int(context.args[1])
+            else:
+                await message.reply_text(
+                    "Cách dùng:\n"
+                    "/copy <message_id> (trong kênh nguồn)\n"
+                    "/copy <channel_nguồn> <message_id> (chat riêng với bot)"
+                )
+                return
+        except (TelegramError, ValueError) as exc:
+            await message.reply_text(f"Tham số không hợp lệ: {exc}")
+            return
+
+        destinations = mappings.destinations_for(source_id)
+        if not destinations:
+            await message.reply_text("Kênh nguồn chưa có mapping.")
+            return
+
+        await copy_to_destinations(
+            bot=context.bot,
+            source_id=source_id,
+            message_ids=[message_id],
+            destinations=destinations,
+            **copy_options,
+        )
+        await message.reply_text(
+            f"Đã copy message [{message_id}] từ {source_id} sang {len(destinations)} đích."
+        )
 
     async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
         LOGGER.exception("Lỗi chưa được xử lý khi nhận update %r", update, exc_info=context.error)
@@ -601,6 +650,7 @@ def create_application(settings: Settings, mappings: MappingStore) -> Applicatio
                 BotCommand("map_list", "Xem toàn bộ mapping"),
                 BotCommand("remove", "Xóa mapping"),
                 BotCommand("chat_id", "Kiểm tra ID channel hiện tại"),
+                BotCommand("copy", "Copy 1 bài từ kênh nguồn sang đích"),
             ]
         )
         LOGGER.info("Bot @%s đã chạy. Mapping: %s", me.username, mappings.describe())
@@ -611,8 +661,15 @@ def create_application(settings: Settings, mappings: MappingStore) -> Applicatio
     application.add_handler(CommandHandler("map_list", map_list_command))
     application.add_handler(CommandHandler("remove", remove_command))
     application.add_handler(CommandHandler("chat_id", chat_id_command))
+    application.add_handler(CommandHandler("copy", copy_command))
     application.add_handler(
-        MessageHandler(filters.UpdateType.MESSAGE | filters.UpdateType.CHANNEL_POST, relay)
+        MessageHandler(
+            filters.UpdateType.MESSAGE
+            | filters.UpdateType.CHANNEL_POST
+            | filters.UpdateType.EDITED_MESSAGE
+            | filters.UpdateType.EDITED_CHANNEL_POST,
+            relay,
+        )
     )
     application.add_error_handler(error_handler)
     return application
@@ -635,7 +692,12 @@ def main() -> None:
 
     application = create_application(settings, mappings)
     application.run_polling(
-        allowed_updates=[UpdateType.MESSAGE, UpdateType.CHANNEL_POST],
+        allowed_updates=[
+            UpdateType.MESSAGE,
+            UpdateType.CHANNEL_POST,
+            UpdateType.EDITED_MESSAGE,
+            UpdateType.EDITED_CHANNEL_POST,
+        ],
         drop_pending_updates=settings.drop_pending_updates,
     )
 

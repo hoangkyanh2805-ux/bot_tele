@@ -1,6 +1,8 @@
 .env
 mappings.json
 deploy/vps-paste.sh
+.bot.pid
+bot.log
 __pycache__/
 *.py[cod]
 .venv/
