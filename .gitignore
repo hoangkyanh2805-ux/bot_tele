@@ -1,0 +1,6 @@
+.env
+mappings.json
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
