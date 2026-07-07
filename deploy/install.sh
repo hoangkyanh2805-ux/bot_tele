@@ -7,7 +7,7 @@ SERVICE_NAME="bot-tele"
 
 echo "=== Cài Telegram Relay Bot ==="
 
-dnf install -y python39 python39-pip git curl
+dnf install -y python3.11 python3.11-pip git curl
 
 if [ -d "$APP_DIR/.git" ]; then
   echo "Cập nhật code..."
@@ -22,7 +22,7 @@ cd "$APP_DIR"
 
 if [ ! -d ".venv" ]; then
   echo "Tạo virtualenv..."
-  python3.9 -m venv .venv
+  python3.11 -m venv .venv
 fi
 
 source .venv/bin/activate
