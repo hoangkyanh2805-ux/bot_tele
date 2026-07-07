@@ -7,10 +7,7 @@ SERVICE_NAME="bot-tele"
 
 echo "=== Cài Telegram Relay Bot ==="
 
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "Cài Python3 và git..."
-  dnf install -y python3 python3-pip git
-fi
+dnf install -y python39 python39-pip git curl
 
 if [ -d "$APP_DIR/.git" ]; then
   echo "Cập nhật code..."
@@ -25,7 +22,7 @@ cd "$APP_DIR"
 
 if [ ! -d ".venv" ]; then
   echo "Tạo virtualenv..."
-  python3 -m venv .venv
+  python3.9 -m venv .venv
 fi
 
 source .venv/bin/activate

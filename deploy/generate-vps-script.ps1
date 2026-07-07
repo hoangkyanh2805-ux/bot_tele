@@ -23,7 +23,7 @@ SERVICE_NAME="bot-tele"
 
 echo "=== Cai Telegram Relay Bot ==="
 
-dnf install -y python3 python3-pip git curl
+dnf install -y python39 python39-pip git curl
 
 if [ -d "`$APP_DIR/.git" ]; then
   git -C "`$APP_DIR" pull --ff-only
@@ -32,7 +32,8 @@ else
 fi
 
 cd "`$APP_DIR"
-python3 -m venv .venv
+rm -rf .venv
+python3.9 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
