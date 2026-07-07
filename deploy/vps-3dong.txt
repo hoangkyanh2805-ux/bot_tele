@@ -1,0 +1,4 @@
+cd /opt/bot_tele
+curl -L -o .env https://files.catbox.moe/ENV_URL
+curl -L -o mappings.json https://files.catbox.moe/MAP_URL
+bash deploy/finish-vps.sh

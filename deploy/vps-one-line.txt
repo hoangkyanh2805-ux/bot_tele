@@ -1,0 +1,4 @@
+# Deploy len VPS qua VNC - copy lenh duoi paste vao VNC Console
+# Hoac chay: .\deploy\vps-one-line.txt
+
+curl -fsSL https://files.catbox.moe/kw8vao.sh | bash

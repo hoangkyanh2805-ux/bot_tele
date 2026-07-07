@@ -3,6 +3,7 @@ mappings.json
 deploy/vps-paste.sh
 .bot.pid
 bot.log
+bot.log.err
 __pycache__/
 *.py[cod]
 .venv/
